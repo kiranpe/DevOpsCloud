@@ -45,6 +45,10 @@
       shell: java -version 2>&1 | awk -F'"' '/version/ {print $2}'
       register: result
     - debug: msg="Java Version is {{ result.stdout }}"
+    - name: removing java tar file from /sites
+      shell: rm /sites/jdk-8u221-linux-x64.tar.gz
+      args:
+        warn: no
     - name: Copy maven tar file
       copy: src=apache-maven-3.6.2-bin.tar.gz dest=/sites mode=0755
     - name: Untar maven 
@@ -73,3 +77,7 @@
       shell: mvn -v 2>&1 | awk -F'(' '/Maven/ {print $1}' | head -1
       register: result
     - debug: msg={{ result.stdout }}
+    - name: removing maven tar file from /sites
+      shell: rm /sites/apache-maven-3.6.2-bin.tar.gz
+      args:
+        warn: no

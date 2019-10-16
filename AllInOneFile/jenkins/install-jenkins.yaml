@@ -38,7 +38,7 @@
          path: /sites/scripts
          state: directory
          mode: '0777'
-     - name: Create scripts directory if it does not exist
+     - name: Create logs directory if it does not exist
        file:
          path: /sites/logs
          state: directory
@@ -50,6 +50,13 @@
           line: 'jenkins ALL=(ALL) NOPASSWD: ALL'
           firstmatch: yes
           state: present
+     - name: get the ip address
+       shell: curl http://169.254.169.254/latest/meta-data/public-ipv4
+       args:
+         warn: no
+       register: result
+     - set_fact: public_ip={{ result.stdout }}
+     - debug: msg="Jenkins Url is http://{{ public_ip }}:8080"
      - name: create .m2 directory
        file:
         path: /var/lib/jenkins/.m2
@@ -71,15 +78,11 @@
          owner: jenkins
          group: jenkins
          mode: '0600'
-     - name: copy terraform and awscli installation script
+     - name: copy terraform,docker and awscli installation script
        copy: src=jenkins-server-setup.sh dest=/sites/scripts mode=0777
-     - name: install terraform and awscli 
+     - name: install terraform and docker,commented out awscli 
        command: sh /sites/scripts/jenkins-server-setup.sh
      - name: Check Terraform Version
        command: terraform --version
-       register: result
-     - debug: msg={{ result.stdout }}
-     - name: Check awscli version
-       command: aws --version
        register: result
      - debug: msg={{ result.stdout }}

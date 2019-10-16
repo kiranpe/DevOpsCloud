@@ -35,7 +35,7 @@
            - "{{ 'export JAVA_HOME=/sites/jdk1.8.0_221' }}" 
            - "{{ 'export PATH=$JAVA_HOME/bin:$PATH' }}"
       become_user: ubuntu
-    - name: Create symbolic link to java
+    - name: Create symbolic link for java
       file:
          src: /sites/jdk1.8.0_221/bin/java 
          dest: /usr/bin/java
@@ -63,7 +63,7 @@
            - "{{ 'export M2_HOME=/sites/apache-maven-3.6.2' }}"
            - "{{ 'export PATH=$M2_HOME/bin:$PATH' }}"
       become_user: ubuntu
-    - name: Create symbolic link to maven
+    - name: Create symbolic link for maven
       file:
          src: /sites/apache-maven-3.6.2/bin/mvn
          dest: /usr/bin/mvn

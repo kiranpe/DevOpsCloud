@@ -19,35 +19,57 @@
       copy: src=jdk-8u221-linux-x64.tar.gz dest=/sites mode=0755
       become_user: ubuntu
     - name: Untar java
-      shell: cd /sites && tar xf jdk-8u221-linux-x64.tar.gz
+      shell: cd /sites && tar xf jdk-*-linux-x64.tar.gz
+      become_user: ubuntu
+    - name: create space after last line
+      shell: echo " " | tee -a ~/.bashrc
       become_user: ubuntu
     - name: add java home and path bashrc file
       lineinfile:
           dest: ~/.bashrc
-          regexp: '^JAVA_HOME'
+          regexp: '^#Java Home'
           line: "{{ item }}" 
           state: present
       with_items:
-           - "{{ '#Java home' }}"
+           - "{{ '#Java_Home' }}"
            - "{{ 'export JAVA_HOME=/sites/jdk1.8.0_221' }}" 
            - "{{ 'export PATH=$JAVA_HOME/bin:$PATH' }}"
       become_user: ubuntu
-    - name: Create symbolic link to java
-      shell: ln -s /sites/jdk1.8.0_221/bin/java /usr/bin/java
-    - debug: msg="Java Installation is complete.. login in to server and check version 'java -version'"
-    - name: Copy maven tar dile
+    - name: Create symbolic link for java
+      file:
+         src: /sites/jdk1.8.0_221/bin/java 
+         dest: /usr/bin/java
+         state: link
+    - debug: msg="Java Installation is complete.. Checking version"
+    - name: check Java Version
+      shell: java -version 2>&1 | awk -F'"' '/version/ {print $2}'
+      register: result
+    - debug: msg="Java Version is {{ result.stdout }}"
+    - name: Copy maven tar file
       copy: src=apache-maven-3.6.2-bin.tar.gz dest=/sites mode=0755
     - name: Untar maven 
-      shell: cd /sites && tar xf apache-maven-3.6.2-bin.tar.gz
+      shell: cd /sites && tar xf apache-maven-*-bin.tar.gz
+    - name: create space after last line
+      shell: echo " " | tee -a ~/.bashrc
+      become_user: ubuntu
     - name: add maven home and path to bashrc file
       lineinfile:
           dest: ~/.bashrc
-          regexp: '^M2_HOME'
+          regexp: '^#M2 Home'
           line: "{{ item }}"
           state: present
       with_items:
-           - "{{ '#Maven home' }}"
+           - "{{ '#M2_Home' }}"
            - "{{ 'export M2_HOME=/sites/apache-maven-3.6.2' }}"
            - "{{ 'export PATH=$M2_HOME/bin:$PATH' }}"
       become_user: ubuntu
-    - debug: msg="Maven Installation is complete.. login in to Server and check version 'mvn -v'"
+    - name: Create symbolic link for maven
+      file:
+         src: /sites/apache-maven-3.6.2/bin/mvn
+         dest: /usr/bin/mvn
+         state: link
+    - debug: msg="Maven Installation is complete.. Checking version"
+    - name: Check Maven Version
+      shell: mvn -v 2>&1 | awk -F'(' '/Maven/ {print $1}' | head -1
+      register: result
+    - debug: msg={{ result.stdout }}

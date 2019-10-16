@@ -51,7 +51,7 @@ resource "aws_instance" "jenkins" {
   }
  
   root_block_device {
-    volume_size = "15"
+    volume_size = "8"
   }
 
   tags = {

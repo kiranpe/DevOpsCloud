@@ -60,8 +60,6 @@
    - debug: msg={{ result.stdout }}
    - name: Change hostname for our better understanging 
      shell: hostnamectl set-hostname worker-node1
-     register: result
-   - debug: msg={{ result.stdout }}
    - debug:
       msg: "[Worker] K8S_TOKEN_HOLDER K8S token is {{ hostvars['K8S_TOKEN_HOLDER']['token'] }}"
    - debug:

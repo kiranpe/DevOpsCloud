@@ -1,6 +1,11 @@
 - name: generating token
   hosts: k8smaster
   tasks:
+   - name: Set authorized key for user ubuntu copying it from current user
+     authorized_key:
+            user: ubuntu
+            state: present
+            key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
    - name: "Cluster token"
      shell: kubeadm token list | cut -d ' ' -f1 | sed -n '2p'
      register: K8S_TOKEN
@@ -23,7 +28,7 @@
    - debug:
        msg: "[Master] K8S_TOKEN_HOLDER K8S IP and PORT is {{ hostvars['K8S_TOKEN_HOLDER']['ip'] }}"
 - name: installing k8s and joining worker node with master
-  hosts: k8sworkernodes
+  hosts: k8sworker
   become: yes
   tasks:
    - name: Add Docker's official GPG key
@@ -55,8 +60,6 @@
    - debug: msg={{ result.stdout }}
    - name: Change hostname for our better understanging 
      shell: hostnamectl set-hostname worker-node1
-     register: result
-   - debug: msg={{ result.stdout }}
    - debug:
       msg: "[Worker] K8S_TOKEN_HOLDER K8S token is {{ hostvars['K8S_TOKEN_HOLDER']['token'] }}"
    - debug:

@@ -55,6 +55,8 @@ sudo docker login
 
 Both will ask for login deatials and enter them
 
+update .m2/settings.xml with your nexus logins...
+
 
 --------------------------------------------------------------------------------------
 Adding Jenkins user to root and rsa key creation was Automated with ansible.. still if you want to add it manually follow below process and remove ansible task from install java and jenkins yaml file.. Below is just for knowledge 

@@ -34,7 +34,7 @@ Jenkins Build For K8S Set up and Docker Image deploy on K8S:(Not Maven.. Just HT
 
 Set up Jenkins build with below Repo
 
-Repo: https://github.com/kiranpe/DevopsCaseStudy.git
+Repo: https://github.com/kiranpe/DevOpsCloud.git
 
 And add below in Build --> Execute Shell
 

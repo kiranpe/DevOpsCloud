@@ -24,7 +24,7 @@ resource "aws_instance" "jenkins" {
   }
   
   provisioner "remote-exec" {
-    inline = ["sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sleep 15 && sudo apt-get install -f ansible -y && sudo hostnamectl set-hostname jenkins"]
+    inline = ["sudo apt upgrade -y && sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sleep 15 && sudo apt-get install -f ansible -y && sudo hostnamectl set-hostname jenkins"]
   } 
  
   # This is where we configure the instance with ansible-playbook
@@ -73,7 +73,7 @@ resource "aws_instance" "nexus" {
   }
 
   provisioner "remote-exec" {
-    inline = ["sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sleep 15 && sudo apt-get install -f ansible -y && sudo hostnamectl set-hostname nexus"]
+    inline = ["sudo apt upgrade -y && sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sleep 15 && sudo apt-get install -f ansible -y && sudo hostnamectl set-hostname nexus"]
   }
 
   # This is where we configure the instance with ansible-playbook
@@ -98,7 +98,6 @@ resource "aws_instance" "nexus" {
   depends_on = [ "aws_instance.jenkins" ]
 }
 
-
 resource "aws_instance" "k8smaster" {
   ami           = "ami-05c1fa8df71875112"
   instance_type = "t2.medium"
@@ -113,7 +112,7 @@ resource "aws_instance" "k8smaster" {
   }
   
   provisioner "remote-exec" {
-    inline = ["sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sleep 15 && sudo apt-get install -f ansible -y && sudo hostnamectl set-hostname master-node"]
+    inline = ["sudo apt upgrade -y && sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sleep 15 && sudo apt-get install -f ansible -y && sudo hostnamectl set-hostname master-node"]
   } 
   
   # This is where we configure the instance with ansible-playbook
@@ -148,7 +147,7 @@ resource "aws_instance" "k8sworkernode" {
   }
 
   provisioner "remote-exec" {
-    inline = ["sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sleep 15 && sudo apt-get install -f ansible -y && sudo hostnamectl set-hostname worker-node"]
+    inline = ["sudo apt upgrade -y && sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sleep 15 && sudo apt-get install -f ansible -y && sudo hostnamectl set-hostname worker-node"]
   }
 
   # This is where we configure the instance with ansible-playbook

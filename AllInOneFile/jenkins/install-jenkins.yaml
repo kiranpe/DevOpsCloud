@@ -1,4 +1,4 @@
-- name: install jenkins on nwely created instance
+- name: install jenkins on newly created instance
   hosts: jenkinsci
   become: yes
  

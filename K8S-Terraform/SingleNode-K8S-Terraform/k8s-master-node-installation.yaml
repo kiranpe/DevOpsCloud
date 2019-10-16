@@ -1,0 +1,78 @@
+- name: Installing k8s on master node
+  hosts: k8smaster
+  become: yes
+  tasks:
+   - name: Set authorized key for user ubuntu copying it from current user
+     authorized_key:
+            user: ubuntu
+            state: present
+            key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+   - name: Add Docker's official GPG key
+     apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+   - name: add stable docker repo
+     apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
+      state: present
+   - name: add k8s key value
+     apt_key:
+      url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+      state: present
+   - name: add k8s stable repo
+     apt_repository:
+      repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+      filename: /etc/apt/sources.list.d/kubernetes
+      state: present
+   - name: install docker kubectl kubelet and kubeadm
+     shell: apt-get update && apt-get install -y docker-ce=18.06.1~ce~3-0~ubuntu kubelet=1.13.5-00 kubeadm=1.13.5-00 kubectl=1.13.5-00 && apt-mark hold docker-ce kubelet kubeadm kubectl
+     args:
+        warn: no
+   - name: add ubuntu user to docker group
+     shell: usermod -aG docker $USER
+   - name: Enable iptables bridge call
+     shell: echo "net.bridge.bridge-nf-call-iptables=1" | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+     register: result
+   - debug: msg={{ result.stdout }}
+   - name: Changing hostname as master node
+     shell: hostnamectl set-hostname master-node
+     register: result
+   - name: Initialize the cluster on master node
+     shell: kubeadm init --pod-network-cidr=10.244.0.0/16
+     register: result
+   - debug: msg={{ result.stdout }}
+   - name: Set up local kubeconfig
+     file:
+        path: $HOME/.kube
+        state: directory
+     become_user: ubuntu
+   - name: copy config files to kube folder
+     shell: sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown $(id -u):$(id -g) $HOME/.kube/config
+     become_user: ubuntu
+     args:
+      warn: no
+   - name: Install Flannel network
+     become: false
+     shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
+   - pause:
+         seconds: 30
+   - name: Check the nodes
+     become: false
+     shell: kubectl get nodes
+     register: nodes
+   - debug: msg={{ nodes.stdout }}
+   - name: Installing Dashboard
+     command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml
+     become_user: ubuntu
+   - name: create svc account for dashboard
+     command: kubectl create serviceaccount dashboard -n default
+     become_user: ubuntu
+   - name: creating cluster role binding
+     command: kubectl create clusterrolebinding dashboard-admin -n default  --clusterrole=cluster-admin  --serviceaccount=default:dashboard
+     become_user: ubuntu
+   - name: Creating cert
+     shell: grep 'client-certificate-data' ~/.kube/config | head -n 1 | awk '{print $2}' | base64 -d >> kubecfg.crt
+     become_user: ubuntu
+   - name: Creating Key
+     shell: grep 'client-key-data' ~/.kube/config | head -n 1 | awk '{print $2}' | base64 -d >> kubecfg.key
+     become_user: ubuntu

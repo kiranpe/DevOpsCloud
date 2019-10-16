@@ -1,0 +1,16 @@
+<settings>
+ <servers>
+  <server>
+   <!-- this id should match the id of the repo server in pom.xml -->
+   <id>maven-releases</id>
+   <username>deployment</username>
+   <password>xxxxxxx</password>
+  </server>
+  <server>
+   <!-- this id should match the id of the repo server in pom.xml -->
+   <id>maven-snapshots</id>
+   <username>deployment</username>
+   <password>xxxxxxx</password>
+  </server>
+ </servers>
+</settings>

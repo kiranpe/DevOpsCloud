@@ -1,0 +1,91 @@
+Download terraform(using linux vesrion): https://www.terraform.io/downloads.html
+
+unzip terraform_0.12.9_linux_amd64.zip
+
+sudo mv terraform /usr/local/bin/
+
+terraform version
+
+Install aws cli:
+-----------------
+
+sudo apt install python3-pip
+
+pip3 install --upgrade --user awscli
+
+Add the install location to the beginning of your PATH variable.
+
+$ export PATH=/home/ec2-user/.local/bin:$PATH
+Add this command to the end of your profile's startup script (for example, ~/.bashrc) to persist the change between command line sessions
+
+sudo apt-get install awscli
+
+aws --version
+aws-cli/1.16.247 Python/3.6.8 Linux/4.15.0-1050-aws botocore/1.12.237
+
+Configuring AWS:
+---------------------
+
+Login to console and search for IAM
+
+go to users and Add user
+
+Create User : Terraform and give programatic access to user
+
+Next create group Terraform and add below access
+
+AdminstrationAccess: full admin access
+AmazonEC2FullAccess: required for this blog post.
+AmazonS3FullAccess: required for How to manage Terraform state.
+AmazonDynamoDBFullAccess: required for How to manage Terraform state.
+AmazonRDSFullAccess: required for How to create reusable infrastructure with Terraform modules.
+
+no need of tags and create user and download csv file
+
+now go back to your linux box
+
+handy: 
+-----------
+https://blog.gruntwork.io/authenticating-to-aws-with-the-credentials-file-d16c0fbcbf9e
+https://medium.com/faun/building-repeatable-infrastructure-with-terraform-and-ansible-on-aws-3f082cd398ad
+
+aws configure
+
+AWS Access Key ID [None]: <Key ID from csv file>
+AWS Secret Access Key [None]: <Access key from key value>
+Default region name [None]: <optional>
+Default output format [None]: <optional>
+
+you can see your credential here: cat ~/.aws/credentials
+
+Now start writting terraform files
+
+ex:vi createinstance.tf
+
+provider "aws" {
+   region = "us-east-2"
+ }
+
+resource "aws_instance" "terraform" {
+  ami           = "ami-05c1fa8df71875112"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "terraform-instance"
+  }
+}
+
+then run terraform commands to create instance
+
+terraform init --> first time to intialize set up
+
+terraform plan --> shows what is going to do
+
+terraform apply --> creates the instance
+
+terraform apply -auto-approve --> if there are any yes or no conditions
+
+terraform apply -target=aws_instance./instance name/ --> if you want to apply changes for particular instance in tf file.. 
+very useful when you see any errors while creating instace..
+
+terraform destroy --> to terminate instance

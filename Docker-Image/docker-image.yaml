@@ -1,0 +1,52 @@
+- name: building image and checking health of url first
+  hosts: localhost
+
+  tasks:
+    - name: Build docker image
+      command: sudo docker build -t kiranp23/devopscasestudy:latest .
+      args:
+         warn: no
+    - name: Run Docker image
+      command: sudo docker run -p 7010:8080 --name casestudy -d kiranp23/devopscasestudy:latest
+      args:
+         warn: no
+    - name: Get the external ip
+      command: curl http://169.254.169.254/latest/meta-data/public-ipv4
+      args:
+        warn: false
+      register: result
+    - debug: msg={{ result.stdout }}
+    - set_fact: external_ip={{ result.stdout }}
+    - name: check container up or not
+      shell: |
+          until $(curl -kIs http://{{ external_ip }}:7010 >> /sites/logs/image.log && grep 200 /sites/logs/image.log > /dev/null); do
+           printf "Container is not up..Checking again.."
+           sleep 5
+          done
+      register: result
+    - debug: msg="Container is Up.. Checking Url Status.."
+    - name: Checking url status.. wait for 200
+      uri: url=http://{{ external_ip }}:7010/casestudy/login.html
+      register: result
+      until: result.status == 200
+      retries: 5
+      delay: 5
+    - debug: msg="Url staus is {{ result.status }}"
+    - name: Print image is fine or not
+      shell: echo "image is good.. we can push to docker hub"
+    - name: pushing image to docker
+      command: sudo docker push kiranp23/devopscasestudy:latest
+      args:
+         warn: no
+    - name:  stopping container
+      command: sudo docker stop casestudy
+      args:
+         warn: no
+    - name: removing container
+      command: sudo docker rm casestudy
+      args:
+         warn: no
+    - name: removing image from local
+      command: sudo docker rmi kiranp23/devopscasestudy:latest
+      args:
+         warn: no

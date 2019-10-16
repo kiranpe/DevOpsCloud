@@ -1,0 +1,2 @@
+[k8smaster]
+18.217.5.103 ansible_user=ubuntu ansible_ssh_common_args='-o StrictHostKeyChecking=no'

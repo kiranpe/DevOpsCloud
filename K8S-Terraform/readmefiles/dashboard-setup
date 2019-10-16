@@ -1,0 +1,19 @@
+openssl pkcs12 -export -clcerts -inkey kubecfg.key -in kubecfg.crt -out kubecfg.p12 -name "kubernetes-client"
+
+mv kubecfg.p12 .kube
+
+local box:
+-------------
+scp -i <your key>.pem ubuntu@<your public ip>:/home/ubuntu/.kube/kubecfg.p12 <path to save file>
+
+Now load this to web browser:
+------------------------------
+Now that we have downlaod the files locally, we can import the kubecfg.p12 certificate. To do this on Chrome, go to Settings and type certificates. 
+The manage certificates option where you can import the certificate will appear.
+
+After importing the certificate, reopen your browser, and visit the Kubernetes Dashboard URL. 
+Accept any warning and you should see the authentication page.
+
+Generate Token:
+---------------
+kubectl get secret $(kubectl get serviceaccount dashboard -o jsonpath="{.secrets[0].name}") -o jsonpath="{.data.token}" | base64 --decode

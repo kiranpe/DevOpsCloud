@@ -1,0 +1,21 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: casestudy-deployment
+spec:
+  selector:
+    matchLabels:
+      app: casestudy
+  replicas: 2 # tells deployment to run 2 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: casestudy
+    spec:
+      containers:
+      - name: casestudy
+        image: kiranp23/devopscasestudy:latest
+        ports:
+        - Port: 8080
+          targetPort: 7010
+          nodePort: 32222 

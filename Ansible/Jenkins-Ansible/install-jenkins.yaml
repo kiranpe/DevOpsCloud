@@ -1,0 +1,59 @@
+- name: install jenkins on nwely created instance
+  hosts: jenkinsci
+  become: yes
+ 
+  tasks:
+     - name: add key 
+       apt_key:
+            url: https://pkg.jenkins.io/debian/jenkins-ci.org.key
+            state: present
+     - name: add repo
+       apt_repository:
+                  repo: deb https://pkg.jenkins.io/debian-stable binary/
+                  state: present
+     - name: run the update
+       shell: sudo apt-get update
+       args:
+          warn: no
+     - name: Install Jenkins
+       apt:
+        name: jenkins
+        state: present
+     - name: Start & Enable Jenkins
+       service: 
+        name: jenkins
+        state: started
+     - name: Sleep for 30 seconds and continue with play
+       wait_for: 
+        timeout: 30
+     - name: Get init password Jenkins
+       shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+       changed_when: false
+       register: result
+     - name: Check Java Version   
+       debug:
+        var: result.stdout
+     - name: Create scripts directory if it does not exist
+       file:
+         path: /sites/scripts
+         state: directory
+         mode: '0777'
+     - name: Create scripts directory if it does not exist
+       file:
+         path: /sites/logs
+         state: directory
+         mode: '0777'
+     - name: add jenkins to root 
+       lineinfile:
+          path: /etc/sudoers
+          insertafter: '^# User privilege specification'
+          line: 'jenkins ALL=(ALL) NOPASSWD: ALL'
+          firstmatch: yes
+          state: present
+     - name: copy pem file to jenkins server
+       copy: 
+         src: /sites/keyfile.pem 
+         dest: /sites 
+         owner: jenkins
+         group: jenkins
+         mode: '0600' 

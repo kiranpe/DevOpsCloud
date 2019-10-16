@@ -1,0 +1,76 @@
+- name: deploy casestudy from master node
+  hosts: k8s-master
+  become_user: ubuntu 
+  tasks:
+     - name: create directory
+       file:
+         path: /home/ubuntu/kp369d/scripts
+         state: directory
+         owner: ubuntu
+         group: ubuntu
+         mode: '0755'
+     - name: create one more directoy for logs
+       file:
+         path: /home/ubuntu/kp369d/logs
+         state: directory
+         owner: ubuntu
+         group: ubuntu
+         mode: '0755'
+     - name: copy host file 
+       copy: src=hosts dest=/home/ubuntu/kp369d/scripts mode=0777
+     - name: transfer the ns script to master node
+       copy: src=check_ns.sh dest=/home/ubuntu/kp369d/scripts mode=0777
+     - name: run the script on master node
+       shell: sh /home/ubuntu/kp369d/scripts/check_ns.sh
+       register: output
+     - debug: msg={{ output.stdout }}
+     - name: transfer the svc and deploy script to master node
+       copy: src=check_svc_deploy.sh dest=/home/ubuntu/kp369d/scripts mode=0777
+     - name: instead of deleting ns every time just delete svc and deploy
+       shell: sh /home/ubuntu/kp369d/scripts/check_svc_deploy.sh
+       register: output
+     - debug: msg={{ output.stdout }}
+     - name: Getting target ip
+       shell: cat /home/ubuntu/kp369d/scripts/hosts | grep -A1 k8s-worker | tail -1 | awk '{print $1}'
+       register: result
+     - debug: msg={{ result.stdout }}
+     - set_fact: target_ip={{ result.stdout }} 
+     - name: run deploy command on masternode
+       command: kubectl run casestudy --image=kiranp23/devopscasestudy:latest --replicas=1 -n com-att-oce-test
+     - name: expose deployment to external ip
+       command: kubectl expose deploy casestudy --external-ip={{ target_ip }} --port=7010 --target-port=8080 --type=NodePort --name=my-service-node -n com-att-oce-test
+     - name: get pod details
+       shell: kubectl get po -n com-att-oce-test | grep casestudy | grep -iv Terminating | awk '{print $1}'
+       register: result
+     - debug: msg={{ result.stdout }}
+     - set_fact: pod={{ result.stdout }}
+     - name: getting pod log and searching string
+       shell: |
+          until $(kubectl logs {{ pod }} -n com-att-oce-test >> /home/ubuntu/kp369d/logs/pod.log && grep "Server startup" /home/ubuntu/kp369d/logs/pod.log > /dev/null); do
+           printf "Pod is coming up\n" 
+           sleep 10
+          done
+       register: result
+     - debug: msg="Pod is up and running"
+     - name: print out search string from log
+       shell: grep "Server startup" /home/ubuntu/kp369d/logs/pod.log
+       register: result
+     - debug: msg={{ result.stdout }}
+     - name: echo server status command
+       shell: echo "Server is up and running.. run health check"
+     - name: removing the log file
+       file:
+         path: /home/ubuntu/kp369d/logs/pod.log
+         state: absent
+     - name: get the nodeport
+       shell: kubectl describe svc my-service-node -n com-att-oce-test | grep "NodePort:" | awk -F">" '{print $2}' | awk -F"/" '{print $1}' | sed -e 's/^[ \t]*//'
+       register: result
+     - debug: msg={{ result.stdout }}
+     - set_fact: nodeport={{ result.stdout }}
+     - name: Checking server health 
+       uri: url=http://{{ target_ip }}:{{ nodeport }}/casestudy/login.html
+       register: result
+     - debug: msg="Url Status is {{ result.status }}"
+     - name: Health Check Url 
+       debug:
+        var: result.url

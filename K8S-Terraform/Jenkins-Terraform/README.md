@@ -11,7 +11,7 @@ don't use any passwords(better to go with open)
 
 Now Set up Jenkins Instance using Terraform
 
-Clone repo to your local https://github.com/kiranpe/DevopsCaseStudy.git 
+Clone repo to your local https://github.com/kiranpe/DevOpsCloud.git 
 
 Go to Jenkins-Terraform folder and run below to set up jenkins instance
 

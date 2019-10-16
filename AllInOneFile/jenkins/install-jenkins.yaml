@@ -15,6 +15,10 @@
        shell: sudo apt-get update
        args:
           warn: no
+     - name: run upgrade
+       shell: sudo apt upgrade -y
+       args:
+         warn: no
      - name: Install Jenkins
        apt:
         name: jenkins

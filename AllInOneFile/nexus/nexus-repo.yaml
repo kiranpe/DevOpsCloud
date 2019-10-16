@@ -8,6 +8,10 @@
             user: ubuntu
             state: present
             key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+   - name: run upgrade
+     shell: sudo apt upgrade -y
+     args:
+        warn: no
    - name: install docker 
      command: apt-get install docker.io -y
      args:

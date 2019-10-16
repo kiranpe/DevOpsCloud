@@ -7,6 +7,10 @@
             user: ubuntu
             state: present
             key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+   - name: run upgrade
+     shell: sudo apt upgrade -y
+     args:
+        warn: no
    - name: Add Docker's official GPG key
      apt_key:
       url: https://download.docker.com/linux/ubuntu/gpg

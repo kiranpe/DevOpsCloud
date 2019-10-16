@@ -31,6 +31,10 @@
   hosts: k8sworker
   become: yes
   tasks:
+   - name: run upgrade
+     shell: sudo apt upgrade -y
+     args:
+        warn: no
    - name: Add Docker's official GPG key
      apt_key:
       url: https://download.docker.com/linux/ubuntu/gpg

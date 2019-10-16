@@ -9,9 +9,9 @@
             state: present
             key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
     - name: run upgrade
-       shell: sudo apt upgrade -y
-       args:
-         warn: no
+      shell: sudo apt upgrade -y
+      args:
+        warn: no
     - name: Create directoy
       file:
         path: /sites

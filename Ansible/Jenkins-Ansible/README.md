@@ -1,13 +1,11 @@
 Jenkins Set up:
 ----------------
 
-Befor starting with Jenkins set up.. create rsa key in LOCAL  
+Befor starting with Jenkins set up.. create rsa key in LOCAL..
 
 cd /home/ubuntu/.ssh
 
-ssh-keygen -t rsa (It's not required when you are setting up K8S from local using terraform.. this is for jenkins build)
-
-don't use any passwords(better to go with open)
+ssh-keygen -t rsa (No password)
 
 Now Set up Jenkins Instance using Terraform
 
@@ -19,7 +17,7 @@ Download Required java jdk(jdk-xxx-linux-x64.tar.gz) and apache maven(apache-mav
 
 Launch ec2 instance and update host value in java and jenkins files in hostfiles folder
 
-Now run below commands to install java and jenkins and add below line to sudoers
+add below line to sudoers
 
 jenkins  ALL=(ALL)  NOPASSWD: ALL
 

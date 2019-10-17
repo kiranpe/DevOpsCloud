@@ -21,6 +21,10 @@ You need Three instances.. One for Master Node, One for Worker Node and One for 
 
 Choose t2.medium Ubuntu Instances for K8S, nexus and t2.micro for jenkins..
 
+Lanch jenkins instance and install java and maven and jenkins..
+
+Launch nexus instace and install docker and run the nexus image..
+
 For Master and workernode instances follow kuberenetes-master-worker file to set up K8S after lanching ubuntu instances.. File is in Ansible/Ansible-K8S/readmefiles/ folder
 
 Follow security group instructions..

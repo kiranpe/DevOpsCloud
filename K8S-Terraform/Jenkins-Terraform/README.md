@@ -41,6 +41,8 @@ For now only Manual tasks in Jenkins is configuring Rsa key, aws credentials and
 
 Login to Jenkins box and do below
 
+Automated this part.. just do docker login
+----------------------------------------------
 Set up rsa key to ssh to K8S instances
 
 sudo su - jenkins (do it as jenkins user.. )
@@ -48,6 +50,8 @@ sudo su - jenkins (do it as jenkins user.. )
 ssh-keygen -t rsa
 
 don't use any passwords(better to go with open) 
+
+-----------------------------------------------------------
 
 aws configure (Required when doing k8s set up using jenkins)
 

@@ -62,13 +62,14 @@ Note: you can get Nodeport from jenkins build or from K8S dashboard.
 Jenkins and K8S Automation using Ansible:
 ------------------------------------------
 
-Uisng Ansible, automated manual installation.. set up files are available in Ansible folder.. First understand manual set up and then go for automation using Ansible.. Follow Readme files..
+Uisng Ansible, automated manual installation.. local setup using ansible files are available in localhost-setup(our system).. remote host set up files are available in Ansible folder.. First understand manual set up and then go for automation using Ansible.. Follow Readme files..
 
 Complete Automation using Terraform:
 -------------------------------------
-Automated everything from creation of EC2 instance to installing Ansible and installing Java, Jenkins, Maven, Nexus3, Docker and K8S installation using Ansible after instance creation.. Manual interaction is very minimal.. Files are available under K8S-Terraform folder.. Follow Readme files..
+Automated everything from creation of EC2 instance to installing Ansible and installing Java, Jenkins, Maven, Nexus3, Docker and K8S installation using Ansible after instance creation.. Manual interaction is very minimal.. Files are available under K8S-Terraform folder.. Follow Readme files.. 
 
-Upcoming:
------------
+All in one go:
+--------------
+First set up your localhost using install-terraform-awscli.yaml.. file is in localhost-setup folder..
 
-#Planning to use Prometheus K8S monitoring tool
+Use install-all.tf file to set up remote hosts and tools using terraform.. file is in "AllInOneFile" folder..

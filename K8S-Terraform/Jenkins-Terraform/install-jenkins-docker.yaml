@@ -78,11 +78,40 @@
          owner: jenkins
          group: jenkins
          mode: '0600'
-     - name: copy terraform,docker and awscli installation script
-       copy: src=jenkins-server-setup.sh dest=/sites/scripts mode=0777
-     - name: install terraform and docker,commented out awscli 
-       command: sh /sites/scripts/jenkins-server-setup.sh
-     - name: Check Terraform Version
+     - name: download terraform 
+       get_url:
+          url: https://releases.hashicorp.com/terraform/0.12.10/terraform_0.12.10_linux_amd64.zip
+          dest: /sites
+     - name: install unzip command
+       command: apt install unzip -y
+     - name: extract terraform zip file
+       unarchive:
+           src: /sites/terraform_0.12.10_linux_amd64.zip
+           dest: /usr/local/bin
+           remote_src: yes
+     - name: Check terraform version
        command: terraform --version
        register: result
      - debug: msg={{ result.stdout }}
+     - name: Delete terraform zip file from /sites
+       file:
+        path: /sites/terraform_0.12.10_linux_amd64.zip
+        state: absent
+     - name: Add Docker's official GPG key
+       apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+     - name: add stable docker repo
+       apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+     - name: install docker
+       shell: apt-get update && apt-get install -y docker-ce=18.06.1~ce~3-0~ubuntu && apt-mark hold docker-ce
+       args:
+        warn: no
+     - name: add ubuntu user to docker group
+       shell: usermod -aG docker $USER
+     - name: Check docker version
+       command: docker --version
+       register: result
+     - debug: msg="{{ result.stdout }}"

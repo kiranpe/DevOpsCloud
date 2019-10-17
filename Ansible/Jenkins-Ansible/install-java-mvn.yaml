@@ -18,8 +18,11 @@
     - name: Copy java tar file
       copy: src=jdk-8u221-linux-x64.tar.gz dest=/sites mode=0755
       become_user: ubuntu
-    - name: Untar java
-      shell: cd /sites && tar xf jdk-*-linux-x64.tar.gz
+    - name: Extract java tar file
+      unarchive:
+          src: /sites/jdk-8u221-linux-x64.tar.gz
+          dest: /sites
+          remote_src: yes
       become_user: ubuntu
     - name: create space after last line
       shell: echo " " | tee -a ~/.bashrc
@@ -46,13 +49,20 @@
       register: result
     - debug: msg="Java Version is {{ result.stdout }}"
     - name: removing java tar file from /sites
-      shell: rm /sites/jdk-8u221-linux-x64.tar.gz
-      args:
-        warn: no
+      file:
+        path: /sites/jdk-8u221-linux-x64.tar.gz
+        state: absent
     - name: Copy maven tar file
       copy: src=apache-maven-3.6.2-bin.tar.gz dest=/sites mode=0755
-    - name: Untar maven 
-      shell: cd /sites && tar xf apache-maven-*-bin.tar.gz
+    - name: Sleep for 30 seconds and continue with play
+      wait_for:
+        timeout: 15
+    - name: Extract maven tar file 
+      unarchive:
+        src: /sites/apache-maven-3.6.2-bin.tar.gz
+        dest: /sites
+        remote_src: yes
+      become_user: ubuntu
     - name: create space after last line
       shell: echo " " | tee -a ~/.bashrc
       become_user: ubuntu
@@ -78,6 +88,6 @@
       register: result
     - debug: msg={{ result.stdout }}
     - name: removing maven tar file from /sites
-      shell: rm /sites/apache-maven-3.6.2-bin.tar.gz
-      args:
-        warn: no
+      file:
+        path: /sites/apache-maven-3.6.2-bin.tar.gz
+        state: absent

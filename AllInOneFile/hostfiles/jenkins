@@ -1,2 +1,2 @@
 [jenkinsci]
-52.14.29.35 ansible_user=ubuntu ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+3.19.246.12 ansible_user=ubuntu ansible_ssh_common_args='-o StrictHostKeyChecking=no'

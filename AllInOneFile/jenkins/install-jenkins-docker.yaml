@@ -55,6 +55,9 @@
        register: result
      - set_fact: public_ip={{ result.stdout }}
      - debug: msg="Jenkins Url is http://{{ public_ip }}:8080"
+     - name: Generating id_rsa key for jenkins user
+       command: ssh-keygen -q -f ~/.ssh/id_rsa -t rsa -N ''
+       become_user: jenkins
      - name: create .m2 directory
        file:
         path: /var/lib/jenkins/.m2

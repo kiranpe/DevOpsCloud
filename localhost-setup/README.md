@@ -5,3 +5,5 @@ if you are facing any issue like need sudo password then login as sudo once "sud
 Then logout and run playbook.
 
 ansible-playbook install-terraform-awscli.yaml
+
+configure aws credentials using "aws configure".

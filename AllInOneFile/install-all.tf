@@ -46,7 +46,7 @@ resource "aws_instance" "jenkins" {
       >hostfiles/jenkins;
       echo "[jenkinsci]" | tee -a hostfiles/jenkins;
       echo "${aws_instance.jenkins.public_ip} ansible_user=${var.ansible_user} ansible_ssh_common_args='-o StrictHostKeyChecking=no'" | tee -a hostfiles/jenkins;
-      ansible-playbook -u ${var.ansible_user} --private-key ${var.private_key} -i hostfiles/jenkins jenkins/install-jenkins.yaml
+      ansible-playbook -u ${var.ansible_user} --private-key ${var.private_key} -i hostfiles/jenkins jenkins/install-jenkins-docker.yaml
     EOT
   }
  

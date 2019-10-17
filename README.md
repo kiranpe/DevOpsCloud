@@ -19,31 +19,39 @@ Manual Set Up (Jenkins + Docker + Ansible):
 --------------------------------------------
 You need Three instances.. One for Master Node, One for Worker Node and One for Jenkins server
 
-Choose t2.medium Ubuntu Instances for K8S set up and jenkins nexus set up..
+Choose t2.medium Ubuntu Instances for K8S, nexus and t2.micro for jenkins..
 
-Create Jenkins instance manually..
+For Master and workernode instances follow kuberenetes-master-worker file to set up K8S after lanching ubuntu instances.. File is in Ansible/Ansible-K8S/readmefiles/ folder
 
-Launch master and workernode instances and follow kuberenetes-master-worker file to set up K8S after lanching ubuntu instances.. File is in Ansible/Ansible-K8S/readmefiles/ folder
+Follow security group instructions..
 
-Follow security group instructions 
+Install ansible in all instances..
 
-Create RSA key for Ansible ssh
+Create RSA key for Ansible ssh..
 
 Set up jenkins build with git repo and add below lines to execute shell commands
 
-#create image and testing it out if image is fine or not
+https://github.com/kiranpe/maven-project.git
 
-sh "$WORKSPACE"/Docker-Image/dockerscript.sh
+Add maven build step with "clean deploy"
 
-#deploying casestudy image and doing healthcheck
+Add below commands to jenkins execute shell in build steps
 
-cd "$WORKSPACE"/Docker-Image/ymlfiles
+#Checking Docker image Quality before deploying to k8s
 
-ansible-playbook casestudy.yaml -i hosts
+ansible-playbook docker-image.yaml
 
-application access
+#Deploying image on K8S
 
-http://<target_ip>:<nodeport>/casestudy/login.html
+cd "$WORKSPACE"/ymlfiles/
+
+#push rsa key to master node
+
+ansible-playbook push_rsa_key.yaml -i hosts --private-key /sites/keyfile.pem
+
+#Deploy image
+
+ansible-playbook webapp.yaml -i hosts
 
 Note: you can get Nodeport from jenkins build or from K8S dashboard. 
 

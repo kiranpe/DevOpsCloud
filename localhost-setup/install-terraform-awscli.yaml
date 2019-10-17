@@ -1,0 +1,46 @@
+- name: Installing terraform and awscli in my local system
+  hosts: localhost
+  become: yes
+  
+  tasks:
+     - name: Create directoy
+       file:
+        path: /sites
+        state: directory
+        recurse: yes
+        owner: ubuntu
+        group: ubuntu
+     - name: download terraform 
+       get_url:
+          url: https://releases.hashicorp.com/terraform/0.12.10/terraform_0.12.10_linux_amd64.zip
+          dest: /sites
+       become_user: ubuntu
+     - name: install unzip command
+       command: apt install unzip -y
+     - name: extract terraform zip file
+       unarchive:
+           src: /sites/terraform_0.12.10_linux_amd64.zip
+           dest: /usr/local/bin
+           remote_src: yes
+     - name: Check terraform version
+       command: terraform --version
+       register: result
+     - debug: msg={{ result.stdout }}
+     - name: Delete terraform zip file from /sites
+       file:
+        path: /sites/terraform_0.12.10_linux_amd64.zip
+        state: absent 
+       become_user: ubuntu
+     - name: install phython pip
+       command: apt install python3-pip
+     - name: run installation
+       command: pip3 install --upgrade --user awscli
+       become_user: ubuntu
+     - name: install aws cli
+       apt:
+        name: awscli
+        state: present 
+     - name: check aws version
+       command: aws --version
+       register: result
+     - debug: msg="{{ result.stdout }}"

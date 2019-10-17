@@ -3,6 +3,9 @@
   become: yes
   
   tasks:
+     - name: Generating id_rsa key for jenkins user
+       command: ssh-keygen -q -f ~/.ssh/id_rsa -t rsa -N ''
+       become_user: ubuntu
      - name: Create directoy
        file:
         path: /sites

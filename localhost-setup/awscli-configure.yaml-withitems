@@ -50,16 +50,43 @@
         state: touch
         mode: '0600'
     - name: add key values to credentials file
-      copy:
-        content: |
-                 [default]
-                 aws_access_key_id = {{ aws_key_id }}
-                 aws_secret_access_key = {{ aws_access_key }}
-        dest: ~/.aws/credentials
+      lineinfile:
+          dest: ~/.aws/credentials
+          regexp: '^default'
+          line: "{{ item }}" 
+          state: present
+      with_items:
+           - "{{ '[default]' }}"
+    - name: add key values to credentials file
+      lineinfile:
+          dest: ~/.aws/credentials
+          regexp: '^access_key'
+          line: "{{ item }} = {{ aws_key_id }}"
+          state: present
+      with_items:
+           - "{{ 'aws_access_key_id' }}"
+    - name: add key values to credentials file
+      lineinfile:
+          dest: ~/.aws/credentials
+          regexp: '^secret_access'
+          line: "{{ item }} = {{ aws_access_key }}"
+          state: present
+      with_items:
+           - "{{ 'aws_secret_access_key' }}"
 
     - name: add region to config file
-      copy:
-        content: |
-                 [default]
-                 region = {{ aws_region }}
-        dest: ~/.aws/config
+      lineinfile:
+          dest: ~/.aws/config
+          regexp: '^default'
+          line: "{{ item }}"
+          state: present
+      with_items:
+           - "{{ '[default]' }}"
+    - name: add region to config file
+      lineinfile:
+          dest: ~/.aws/config
+          regexp: '^region'
+          line: "{{ item }} = {{ aws_region }}"
+          state: present
+      with_items:
+           - "{{ 'region' }}"

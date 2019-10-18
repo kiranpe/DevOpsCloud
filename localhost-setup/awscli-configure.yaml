@@ -1,0 +1,92 @@
+- name: configuring awscli using ansible
+  hosts: localhost
+  become_user: ubuntu
+  vars_prompt:
+    - name: aws_key_id
+      prompt: "Enter your AWS terraform user Key ID form CSV File"
+      private: no
+    - name: aws_access_key
+      prompt: "Enter your AWS terraform user Access Key form CSV File"
+      private: no
+    - name: aws_region
+      prompt: "Enter your AWS region"
+      private: no
+    - name: aws_format_output
+      prompt: "Enter output type(Optional)"
+      private: no
+  
+  tasks:
+    - name: install phython pip
+      command: sudo apt install python3-pip -y
+      args:
+        warn: no
+
+    - name: run installation
+      command: pip3 install --upgrade --user awscli
+
+    - name: install aws cli
+      apt:
+        name: awscli
+        state: present
+      become: yes
+
+    - name: check aws version
+      command: aws --version
+      register: result
+    - debug: msg="{{ result.stdout }}"
+
+    - name: create aws directory if not present
+      file:
+        path: ~/.aws
+        state: directory
+    - name: create credentials file
+      file:
+        path: ~/.aws/credentials
+        state: touch
+        mode: '0600'
+    - name: create config file
+      file:
+        path: ~/.aws/config
+        state: touch
+        mode: '0600'
+    - name: add key values to credentials file
+      lineinfile:
+          dest: ~/.aws/credentials
+          regexp: '^default'
+          line: "{{ item }}" 
+          state: present
+      with_items:
+           - "{{ '[default]' }}"
+    - name: add key values to credentials file
+      lineinfile:
+          dest: ~/.aws/credentials
+          regexp: '^access_key'
+          line: "{{ item }} = {{ aws_key_id }}"
+          state: present
+      with_items:
+           - "{{ 'aws_access_key_id' }}"
+    - name: add key values to credentials file
+      lineinfile:
+          dest: ~/.aws/credentials
+          regexp: '^secret_access'
+          line: "{{ item }} = {{ aws_access_key }}"
+          state: present
+      with_items:
+           - "{{ 'aws_secret_access_key' }}"
+
+    - name: add region to config file
+      lineinfile:
+          dest: ~/.aws/config
+          regexp: '^default'
+          line: "{{ item }}"
+          state: present
+      with_items:
+           - "{{ '[default]' }}"
+    - name: add region to config file
+      lineinfile:
+          dest: ~/.aws/config
+          regexp: '^region'
+          line: "{{ item }} = {{ aws_region }}"
+          state: present
+      with_items:
+           - "{{ 'region' }}"

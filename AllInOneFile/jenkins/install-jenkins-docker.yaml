@@ -12,35 +12,45 @@
                   repo: deb https://pkg.jenkins.io/debian-stable binary/
                   state: present
      - name: run the update
-       shell: sudo apt-get update
+       shell: apt-get update
        args:
           warn: no
+     
+     - name: Install aptitude using apt
+       apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+
      - name: Install Jenkins
        apt:
         name: jenkins
         state: present
+
      - name: Start & Enable Jenkins
        service: 
         name: jenkins
         state: started
+
      - name: Sleep for 30 seconds and continue with play
        wait_for: 
         timeout: 30
+
      - name: Get init password Jenkins
        shell: cat /var/lib/jenkins/secrets/initialAdminPassword
        changed_when: false
        register: result
      - debug: msg="{{ result.stdout }}"
+
      - name: Create scripts directory if it does not exist
        file:
          path: /sites/scripts
          state: directory
          mode: '0777'
+
      - name: Create logs directory if it does not exist
        file:
          path: /sites/logs
          state: directory
          mode: '0777'
+
      - name: add jenkins to root
        lineinfile:
           path: /etc/sudoers
@@ -48,6 +58,7 @@
           line: 'jenkins ALL=(ALL) NOPASSWD: ALL'
           firstmatch: yes
           state: present
+
      - name: get the ip address
        shell: curl http://169.254.169.254/latest/meta-data/public-ipv4
        args:
@@ -55,9 +66,11 @@
        register: result
      - set_fact: public_ip={{ result.stdout }}
      - debug: msg="Jenkins Url is http://{{ public_ip }}:8080"
+
      - name: Generating id_rsa key for jenkins user
        command: ssh-keygen -q -f ~/.ssh/id_rsa -t rsa -N ''
        become_user: jenkins
+
      - name: create .m2 directory
        file:
         path: /var/lib/jenkins/.m2
@@ -65,6 +78,7 @@
         recurse: yes
         owner: jenkins
         group: jenkins
+
      - name: copy settings.xml
        copy:
         src: settings.xml
@@ -72,6 +86,7 @@
         owner: jenkins
         group: jenkins
         mode: '0664'
+
      - name: copy pem file to jenkins server
        copy:
          src: /sites/keyfile.pem
@@ -79,39 +94,49 @@
          owner: jenkins
          group: jenkins
          mode: '0600'
+
      - name: download terraform 
        get_url:
           url: https://releases.hashicorp.com/terraform/0.12.10/terraform_0.12.10_linux_amd64.zip
           dest: /sites
+
      - name: install unzip command
        command: apt install unzip -y
+
      - name: extract terraform zip file
        unarchive:
            src: /sites/terraform_0.12.10_linux_amd64.zip
            dest: /usr/local/bin
            remote_src: yes
+
      - name: Check terraform version
        command: terraform --version
        register: result
      - debug: msg={{ result.stdout }}
+
      - name: Delete terraform zip file from /sites
        file:
         path: /sites/terraform_0.12.10_linux_amd64.zip
         state: absent
+
      - name: Add Docker's official GPG key
        apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
         state: present
+
      - name: add stable docker repo
        apt_repository:
         repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
         state: present
+
      - name: install docker
        shell: apt-get update && apt-get install -y docker-ce=18.06.1~ce~3-0~ubuntu && apt-mark hold docker-ce
        args:
         warn: no
+
      - name: add ubuntu user to docker group
        shell: usermod -aG docker $USER
+
      - name: Check docker version
        command: docker --version
        register: result

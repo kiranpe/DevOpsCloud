@@ -8,6 +8,7 @@
             user: ubuntu
             state: present
             key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+
     - name: Create directoy
       file:
         path: /sites
@@ -15,18 +16,22 @@
         recurse: yes
         owner: ubuntu
         group: ubuntu
+
     - name: Copy java tar file
       copy: src=jdk-8u221-linux-x64.tar.gz dest=/sites mode=0755
       become_user: ubuntu
+
     - name: Extract java tar file
       unarchive:
           src: /sites/jdk-8u221-linux-x64.tar.gz
           dest: /sites
           remote_src: yes
       become_user: ubuntu
+
     - name: create space after last line
       shell: echo " " | tee -a ~/.bashrc
       become_user: ubuntu
+
     - name: add java home and path bashrc file
       lineinfile:
           dest: ~/.bashrc
@@ -38,34 +43,42 @@
            - "{{ 'export JAVA_HOME=/sites/jdk1.8.0_221' }}" 
            - "{{ 'export PATH=$JAVA_HOME/bin:$PATH' }}"
       become_user: ubuntu
+
     - name: Create symbolic link for java
       file:
          src: /sites/jdk1.8.0_221/bin/java 
          dest: /usr/bin/java
          state: link
     - debug: msg="Java Installation is complete.. Checking version"
+
     - name: check Java Version
       shell: java -version 2>&1 | awk -F'"' '/version/ {print $2}'
       register: result
     - debug: msg="Java Version is {{ result.stdout }}"
+
     - name: removing java tar file from /sites
       file:
         path: /sites/jdk-8u221-linux-x64.tar.gz
         state: absent
+
     - name: Copy maven tar file
       copy: src=apache-maven-3.6.2-bin.tar.gz dest=/sites mode=0755
-    - name: Sleep for 30 seconds and continue with play
+
+    - name: Sleep for 15 seconds and continue with play
       wait_for:
         timeout: 15
+
     - name: Extract maven tar file 
       unarchive:
         src: /sites/apache-maven-3.6.2-bin.tar.gz
         dest: /sites
         remote_src: yes
       become_user: ubuntu
+
     - name: create space after last line
       shell: echo " " | tee -a ~/.bashrc
       become_user: ubuntu
+
     - name: add maven home and path to bashrc file
       lineinfile:
           dest: ~/.bashrc
@@ -77,16 +90,19 @@
            - "{{ 'export M2_HOME=/sites/apache-maven-3.6.2' }}"
            - "{{ 'export PATH=$M2_HOME/bin:$PATH' }}"
       become_user: ubuntu
+
     - name: Create symbolic link for maven
       file:
          src: /sites/apache-maven-3.6.2/bin/mvn
          dest: /usr/bin/mvn
          state: link
     - debug: msg="Maven Installation is complete.. Checking version"
+
     - name: Check Maven Version
       shell: mvn -v 2>&1 | awk -F'(' '/Maven/ {print $1}' | head -1
       register: result
     - debug: msg={{ result.stdout }}
+
     - name: removing maven tar file from /sites
       file:
         path: /sites/apache-maven-3.6.2-bin.tar.gz

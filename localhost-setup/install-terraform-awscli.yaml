@@ -1,11 +1,19 @@
 - name: Installing terraform and awscli in my local system
   hosts: localhost
   become: yes
+  vars_prompt:
+    - name: hub_username
+      prompt: "Enter your Docker Hub username"
+      private: no
+    - name: hub_password
+      prompt: "Enter your Docker Hub password"
+      private: yes
   
   tasks:
      - name: Generating id_rsa key for jenkins user
        command: ssh-keygen -q -f ~/.ssh/id_rsa -t rsa -N ''
        become_user: ubuntu
+
      - name: Create directoy
        file:
         path: /sites
@@ -13,37 +21,69 @@
         recurse: yes
         owner: ubuntu
         group: ubuntu
+
      - name: download terraform 
        get_url:
           url: https://releases.hashicorp.com/terraform/0.12.10/terraform_0.12.10_linux_amd64.zip
           dest: /sites
        become_user: ubuntu
+
      - name: install unzip command
        command: apt install unzip -y
+
      - name: extract terraform zip file
        unarchive:
            src: /sites/terraform_0.12.10_linux_amd64.zip
            dest: /usr/local/bin
            remote_src: yes
+
      - name: Check terraform version
        command: terraform --version
        register: result
      - debug: msg={{ result.stdout }}
+ 
      - name: Delete terraform zip file from /sites
        file:
         path: /sites/terraform_0.12.10_linux_amd64.zip
         state: absent 
        become_user: ubuntu
+ 
+     - name: Install aptitude using apt
+       apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+ 
      - name: install phython pip
-       command: apt install python3-pip
-     - name: run installation
-       command: pip3 install --upgrade --user awscli
+       command: apt install python3-pip -y
+ 
+     - name: Install required system packages
+       apt: name={{ item }} state=latest update_cache=yes
+       loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
+
+     - name: Add Docker GPG apt Key
+       apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+     - name: Add Docker Repository
+       apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+     - name: Update apt and install docker-ce
+       apt: update_cache=yes name=docker-ce state=latest
+    
+     - name: Install python pip
+       command: apt install python-pip -y
+
+     - name: Install Docker Module for Python
+       command: pip3 install docker
        become_user: ubuntu
-     - name: install aws cli
-       apt:
-        name: awscli
-        state: present 
-     - name: check aws version
-       command: aws --version
-       register: result
-     - debug: msg="{{ result.stdout }}"
+ 
+     - name: Log in to Docker Hub
+       docker_login:
+           username: "{{ hub_username }}"
+           password: "{{ hub_password }}"
+           reauthorize: yes
+       register: login_results
+       become_user: ubuntu
+     - debug: 
+         var: login_results

@@ -10,4 +10,4 @@ Install awscli:
 
 configuring aws:
 -------------------
-ansible-playbook awscli-configure.yaml --extra-vars "ansible_sudo_pass=Chinni.23 ansible_python_interpreter=/usr/bin/python3"
+ansible-playbook awscli-configure.yaml --extra-vars "ansible_sudo_pass=yourPassword ansible_python_interpreter=/usr/bin/python3"

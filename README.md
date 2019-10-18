@@ -57,6 +57,8 @@ ansible-playbook push_rsa_key.yaml -i hosts --private-key /sites/keyfile.pem
 
 ansible-playbook webapp.yaml -i hosts
 
+Access url: http://public_ip:nodeport/webapp/login.html
+
 Note: you can get Nodeport from jenkins build or from K8S dashboard. 
 
 Jenkins and K8S Automation using Ansible:

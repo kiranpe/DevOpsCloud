@@ -138,9 +138,6 @@
         path: /sites/terraform.zip
         state: absent
 
-     - name: Install aptitude using apt
-       apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
- 
      - name: install phython pip
        command: apt install python3-pip -y
  

@@ -164,14 +164,6 @@
      - name: Install Docker Module for Python for root user
        command: pip3 install docker
    
-     - name: Install Docker Module for Python for ubuntu user
-       command: pip3 install docker
-       become_user: ubuntu
-
-     - name: Install Docker Module for Python for jenkins user
-       command: pip3 install docker
-       become_user: jenkins
-     
      - name: Check docker version
        command: docker --version
        register: result

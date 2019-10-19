@@ -7,3 +7,9 @@ This tf file is not like other files.. you need to pass your docker hub username
 once you pass the valus and run the terrafor apply, you just watch the screen.. if incase it breaks then run terraform plan again and then run apply command again.. your manual work is just zero.
 
 After servers installation is complete, set up pipeline build by following the maven-project README.md file..
+
+Creating Maven security file..
+
+mvn -emp yourmasterpassword --> generates master encrypted password and update in settings-security.xml
+
+mvn -ep yourdeploymentuserpassword --> generates deployment user encryoted password and update it in settings.xml

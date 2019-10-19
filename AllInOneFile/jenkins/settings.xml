@@ -4,13 +4,13 @@
    <!-- this id should match the id of the repo server in pom.xml -->
    <id>maven-releases</id>
    <username>deployment</username>
-   <password>xxxxxxx</password>
+   <password>{kINpWh6Ch9MHgRpKIr4V2lnStmp7TJ5VFCVnOqneSBU=}</password>
   </server>
   <server>
    <!-- this id should match the id of the repo server in pom.xml -->
    <id>maven-snapshots</id>
    <username>deployment</username>
-   <password>xxxxxxx</password>
+   <password>{kINpWh6Ch9MHgRpKIr4V2lnStmp7TJ5VFCVnOqneSBU=}</password>
   </server>
  </servers>
 </settings>

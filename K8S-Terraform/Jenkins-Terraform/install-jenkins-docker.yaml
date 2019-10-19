@@ -72,6 +72,13 @@
         owner: jenkins
         group: jenkins
         mode: '0664'
+     - name: copy settings-security.xml
+       copy:
+        src: settings-security.xml
+        dest: /var/lib/jenkins/.m2
+        owner: jenkins
+        group: jenkins
+        mode: '0664'
      - name: copy pem file to jenkins server
        copy:
          src: /sites/keyfile.pem

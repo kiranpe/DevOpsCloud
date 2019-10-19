@@ -94,18 +94,29 @@
          owner: jenkins
          group: jenkins
          mode: '0600'
-
-     - name: download terraform 
+     
+     - name: install jq
+       command: apt install jq -y
+       
+     - name: check latest terraform version
+       shell: curl -sL https://releases.hashicorp.com/terraform/index.json | jq -r '.versions[].builds[].url' | egrep 'terraform_[0-9]\.[0-9]{1,2}\.[0-9]{1,2}_linux.*amd64' | sort -V | tail -1
+       register: result
+       args:
+        warn: no
+     - set_fact: url="{{ result.stdout }}"
+      
+     - name: download latest version
        get_url:
-          url: https://releases.hashicorp.com/terraform/0.12.10/terraform_0.12.10_linux_amd64.zip
-          dest: /sites
+          url: "{{ url }}"
+          dest: /sites/terraform.zip
+          mode: '0755'
 
      - name: install unzip command
        command: apt install unzip -y
 
      - name: extract terraform zip file
        unarchive:
-           src: /sites/terraform_0.12.10_linux_amd64.zip
+           src: /sites/terraform.zip
            dest: /usr/local/bin
            remote_src: yes
 
@@ -116,28 +127,56 @@
 
      - name: Delete terraform zip file from /sites
        file:
-        path: /sites/terraform_0.12.10_linux_amd64.zip
+        path: /sites/terraform.zip
         state: absent
 
-     - name: Add Docker's official GPG key
+     - name: Install aptitude using apt
+       apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+ 
+     - name: install phython pip
+       command: apt install python3-pip -y
+ 
+     - name: Install required system packages
+       apt: name={{ item }} state=latest update_cache=yes
+       loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
+
+     - name: Add Docker GPG apt Key
        apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
         state: present
 
-     - name: add stable docker repo
+     - name: Add Docker Repository
        apt_repository:
-        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
         state: present
 
-     - name: install docker
-       shell: apt-get update && apt-get install -y docker-ce=18.06.1~ce~3-0~ubuntu && apt-mark hold docker-ce
-       args:
-        warn: no
+     - name: Update apt and install docker-ce
+       apt: update_cache=yes name=docker-ce state=latest
+     
+     - name: Install python pip
+       command: apt install python-pip -y
+   
+     - name: Install Docker Module for Python for root user
+       command: pip3 install docker
+   
+     - name: Install Docker Module for Python for ubuntu user
+       command: pip3 install docker
+       become_user: ubuntu
 
-     - name: add ubuntu user to docker group
-       shell: usermod -aG docker $USER
-
+     - name: Install Docker Module for Python for jenkins user
+       command: pip3 install docker
+       become_user: jenkins
+     
      - name: Check docker version
        command: docker --version
        register: result
      - debug: msg="{{ result.stdout }}"
+ 
+     - name: Log in to Docker Hub
+       docker_login:
+           username: "{{ hub_username }}"
+           password: "{{ hub_password }}"
+           reauthorize: yes
+       register: login_results
+     - debug: 
+         var: login_results

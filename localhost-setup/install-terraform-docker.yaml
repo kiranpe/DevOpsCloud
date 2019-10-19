@@ -22,18 +22,28 @@
         owner: ubuntu
         group: ubuntu
 
-     - name: download terraform 
+     - name: install jq
+       command: apt install jq -y
+
+     - name: check latest terraform version
+       shell: curl -sL https://releases.hashicorp.com/terraform/index.json | jq -r '.versions[].builds[].url' | egrep 'terraform_[0-9]\.[0-9]{1,2}\.[0-9]{1,2}_linux.*amd64' | sort -V | tail -1
+       register: result
+       args:
+        warn: no
+     - set_fact: url="{{ result.stdout }}"
+
+     - name: download latest version
        get_url:
-          url: https://releases.hashicorp.com/terraform/0.12.10/terraform_0.12.10_linux_amd64.zip
-          dest: /sites
-       become_user: ubuntu
+          url: "{{ url }}"
+          dest: /sites/terraform.zip
+          mode: '0755'
 
      - name: install unzip command
        command: apt install unzip -y
 
      - name: extract terraform zip file
        unarchive:
-           src: /sites/terraform_0.12.10_linux_amd64.zip
+           src: /sites/terraform.zip
            dest: /usr/local/bin
            remote_src: yes
 
@@ -41,13 +51,12 @@
        command: terraform --version
        register: result
      - debug: msg={{ result.stdout }}
- 
+
      - name: Delete terraform zip file from /sites
        file:
-        path: /sites/terraform_0.12.10_linux_amd64.zip
+        path: /sites/terraform.zip
         state: absent 
-       become_user: ubuntu
- 
+    
      - name: Install aptitude using apt
        apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
  

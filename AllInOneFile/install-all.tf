@@ -45,8 +45,8 @@ resource "aws_instance" "jenkins" {
       sleep 30;
       >hostfiles/jenkins;
       echo "[jenkinsci]" | tee -a hostfiles/jenkins;
-      echo "${aws_instance.jenkins.public_ip} ansible_user=${var.ansible_user} ansible_ssh_common_args='-o StrictHostKeyChecking=no'" | tee -a hostfiles/jenkins;
-      ansible-playbook -u ${var.ansible_user} --private-key ${var.private_key} -i hostfiles/jenkins jenkins/install-jenkins-docker.yaml
+      echo "${aws_instance.jenkins.public_ip} ansible_user=${var.ansible_user} ansible_ssh_common_args='-o StrictHostKeyChecking=no' ansible_python_interpreter=/usr/bin/python3" | tee -a hostfiles/jenkins;
+      ansible-playbook -u ${var.ansible_user} --private-key ${var.private_key} -i hostfiles/jenkins jenkins/install-jenkins-docker.yaml -e "hub_username=kiranp23 hub_password=chinni.23"
     EOT
   }
  

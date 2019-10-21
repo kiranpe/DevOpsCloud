@@ -5,7 +5,7 @@
 |                                                                                              |
 | Cloud: AWS,    Cloud--Orchestration: Terraform                                               |
 |                                                                                              |
-| Container: Docker,   Container-Orchestration: Kubernetes,  Env-Automation: Ansible           |
+| Container: Docker,   Container-Orchestration: Kubernetes,  Infra-Configuration: Ansible           |
 |                                                                                              |
 | Source Code Repo: GIT,  CI: Jenkins,   Build Tool: Maven,   Maven-Repo: Nexus3               |
 |                                                                                              |

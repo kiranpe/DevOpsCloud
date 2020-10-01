@@ -1,10 +1,10 @@
 provider "aws" {
-   region = "us-east-2"
- }
+  region = "us-east-2"
+}
 
 variable "private_key" {
   default = "/home/ubuntu/keyfile.pem"
- }
+}
 
 variable "ansible_user" {
   default = "ubuntu"
@@ -15,12 +15,12 @@ resource "aws_instance" "workernode" {
   instance_type = "t2.medium"
 
   security_groups = ["k8scluster"]
-  key_name = "k8skey"
+  key_name        = "k8skey"
 
   connection {
-      user        = "${var.ansible_user}"
-      private_key = "${file(var.private_key)}"
-      host = "${aws_instance.workernode.public_ip}"
+    user        = "${var.ansible_user}"
+    private_key = "${file(var.private_key)}"
+    host        = "${aws_instance.workernode.public_ip}"
   }
 
   provisioner "remote-exec" {

@@ -1,10 +1,10 @@
 provider "aws" {
-   region = "us-east-2"
- }
+  region = "us-east-2"
+}
 
 variable "private_key" {
   default = "/sites/keyfile.pem"
- }
+}
 
 variable "ansible_user" {
   default = "ubuntu"
@@ -17,20 +17,20 @@ variable "instance_count" {
 resource "aws_instance" "k8smaster" {
   ami           = "ami-05c1fa8df71875112"
   instance_type = "t2.medium"
-  
+
   security_groups = ["k8scluster"]
-  key_name = "k8skey"
-  
+  key_name        = "k8skey"
+
   connection {
-      user        = "${var.ansible_user}"
-      private_key = "${file(var.private_key)}"
-      host = "${aws_instance.k8smaster.public_ip}"
+    user        = "${var.ansible_user}"
+    private_key = "${file(var.private_key)}"
+    host        = "${aws_instance.k8smaster.public_ip}"
   }
-  
+
   provisioner "remote-exec" {
     inline = ["sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sleep 15 && sudo apt-get install -f ansible -y && sudo hostnamectl set-hostname master-node"]
-  } 
-  
+  }
+
   # This is where we configure the instance with ansible-playbook
   # install K8S on master node
   provisioner "local-exec" {
@@ -42,7 +42,7 @@ resource "aws_instance" "k8smaster" {
       ansible-playbook -u ${var.ansible_user} --private-key ${var.private_key} -i hostfiles/masterhost k8s-master-node-installation.yaml
     EOT
   }
- 
+
   tags = {
     Name = "k8smaster-node"
   }
@@ -53,12 +53,12 @@ resource "aws_instance" "k8sworkernode" {
   instance_type = "t2.medium"
 
   security_groups = ["k8scluster"]
-  key_name = "k8skey"
+  key_name        = "k8skey"
 
   connection {
-      user        = "${var.ansible_user}"
-      private_key = "${file(var.private_key)}"
-      host = "${aws_instance.k8sworkernode.public_ip}"
+    user        = "${var.ansible_user}"
+    private_key = "${file(var.private_key)}"
+    host        = "${aws_instance.k8sworkernode.public_ip}"
   }
 
   provisioner "remote-exec" {
@@ -80,8 +80,8 @@ resource "aws_instance" "k8sworkernode" {
   tags = {
     Name = "k8sworker-node"
   }
-  
-  depends_on = [ "aws_instance.k8smaster" ]
+
+  depends_on = ["aws_instance.k8smaster"]
 }
 
 resource "aws_instance" "k8sworkernode1" {
@@ -89,12 +89,12 @@ resource "aws_instance" "k8sworkernode1" {
   instance_type = "t2.medium"
 
   security_groups = ["k8scluster"]
-  key_name = "k8skey"
+  key_name        = "k8skey"
 
   connection {
-      user        = "${var.ansible_user}"
-      private_key = "${file(var.private_key)}"
-      host = "${aws_instance.k8sworkernode1.public_ip}"
+    user        = "${var.ansible_user}"
+    private_key = "${file(var.private_key)}"
+    host        = "${aws_instance.k8sworkernode1.public_ip}"
   }
 
   provisioner "remote-exec" {
@@ -116,7 +116,7 @@ resource "aws_instance" "k8sworkernode1" {
   tags = {
     Name = "k8sworker-node1"
   }
-  depends_on = [ "aws_instance.k8sworkernode" ]
+  depends_on = ["aws_instance.k8sworkernode"]
 
 }
 

@@ -1,10 +1,10 @@
 provider "aws" {
-   region = "us-east-2"
- }
+  region = "us-east-2"
+}
 
 variable "private_key" {
   default = "/sites/keyfile.pem"
- }
+}
 
 variable "ansible_user" {
   default = "ubuntu"
@@ -13,20 +13,20 @@ variable "ansible_user" {
 resource "aws_instance" "jenkins" {
   ami           = "ami-05c1fa8df71875112"
   instance_type = "t2.micro"
- 
+
   security_groups = ["k8scluster"]
-  key_name = "k8skey"
-  
+  key_name        = "k8skey"
+
   connection {
-      user        = "${var.ansible_user}"
-      private_key = "${file(var.private_key)}"
-      host = "${aws_instance.jenkins.public_ip}"
+    user        = "${var.ansible_user}"
+    private_key = "${file(var.private_key)}"
+    host        = "${aws_instance.jenkins.public_ip}"
   }
-  
+
   provisioner "remote-exec" {
     inline = ["sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sleep 15 && sudo apt-get install -f ansible -y && sudo hostnamectl set-hostname jenkins"]
-  } 
- 
+  }
+
   # This is where we configure the instance with ansible-playbook
   # Jenkins requires Java to be installed 
   provisioner "local-exec" {
@@ -38,7 +38,7 @@ resource "aws_instance" "jenkins" {
 	  ansible-playbook -u ${var.ansible_user} --private-key ${var.private_key} -i hostfiles/java jenkins/install-java-mvn.yaml
     EOT
   }
-  
+
   # This is where we configure the instance with ansible-playbook
   provisioner "local-exec" {
     command = <<EOT
@@ -49,7 +49,7 @@ resource "aws_instance" "jenkins" {
       ansible-playbook -u ${var.ansible_user} --private-key ${var.private_key} -i hostfiles/jenkins jenkins/install-jenkins-docker.yaml -e "hub_username=DockerHubUName hub_password=DockerHubPswrd"
     EOT
   }
- 
+
   root_block_device {
     volume_size = "8"
   }
@@ -64,12 +64,12 @@ resource "aws_instance" "nexus" {
   instance_type = "t2.medium"
 
   security_groups = ["k8scluster"]
-  key_name = "k8skey"
+  key_name        = "k8skey"
 
   connection {
-      user        = "${var.ansible_user}"
-      private_key = "${file(var.private_key)}"
-      host = "${aws_instance.nexus.public_ip}"
+    user        = "${var.ansible_user}"
+    private_key = "${file(var.private_key)}"
+    host        = "${aws_instance.nexus.public_ip}"
   }
 
   provisioner "remote-exec" {
@@ -95,26 +95,26 @@ resource "aws_instance" "nexus" {
   tags = {
     Name = "nexus-instance"
   }
-  depends_on = [ "aws_instance.jenkins" ]
+  depends_on = ["aws_instance.jenkins"]
 }
 
 resource "aws_instance" "k8smaster" {
   ami           = "ami-05c1fa8df71875112"
   instance_type = "t2.medium"
-  
+
   security_groups = ["k8scluster"]
-  key_name = "k8skey"
-  
+  key_name        = "k8skey"
+
   connection {
-      user        = "${var.ansible_user}"
-      private_key = "${file(var.private_key)}"
-      host = "${aws_instance.k8smaster.public_ip}"
+    user        = "${var.ansible_user}"
+    private_key = "${file(var.private_key)}"
+    host        = "${aws_instance.k8smaster.public_ip}"
   }
-  
+
   provisioner "remote-exec" {
     inline = ["sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sleep 15 && sudo apt-get install -f ansible -y && sudo hostnamectl set-hostname master-node"]
-  } 
-  
+  }
+
   # This is where we configure the instance with ansible-playbook
   # install K8S on master node
   provisioner "local-exec" {
@@ -126,11 +126,11 @@ resource "aws_instance" "k8smaster" {
       ansible-playbook -u ${var.ansible_user} --private-key ${var.private_key} -i hostfiles/masterhost K8S/k8s-master-node-installation.yaml
     EOT
   }
- 
+
   tags = {
     Name = "k8smaster-node"
   }
-  depends_on = [ "aws_instance.nexus" ]
+  depends_on = ["aws_instance.nexus"]
 }
 
 resource "aws_instance" "k8sworkernode" {
@@ -138,12 +138,12 @@ resource "aws_instance" "k8sworkernode" {
   instance_type = "t2.medium"
 
   security_groups = ["k8scluster"]
-  key_name = "k8skey"
+  key_name        = "k8skey"
 
   connection {
-      user        = "${var.ansible_user}"
-      private_key = "${file(var.private_key)}"
-      host = "${aws_instance.k8sworkernode.public_ip}"
+    user        = "${var.ansible_user}"
+    private_key = "${file(var.private_key)}"
+    host        = "${aws_instance.k8sworkernode.public_ip}"
   }
 
   provisioner "remote-exec" {
@@ -166,8 +166,8 @@ resource "aws_instance" "k8sworkernode" {
   tags = {
     Name = "k8sworker-node"
   }
-  
-  depends_on = [ "aws_instance.k8smaster" ]
+
+  depends_on = ["aws_instance.k8smaster"]
 }
 
 output "jenkins-url" {

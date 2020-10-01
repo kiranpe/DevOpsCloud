@@ -1,10 +1,10 @@
 provider "aws" {
-   region = "us-east-2"
- }
+  region = "us-east-2"
+}
 
 variable "private_key" {
   default = "/sites/keyfile.pem"
- }
+}
 
 variable "ansible_user" {
   default = "ubuntu"
@@ -13,20 +13,20 @@ variable "ansible_user" {
 resource "aws_instance" "nexus" {
   ami           = "ami-05c1fa8df71875112"
   instance_type = "t2.medium"
- 
+
   security_groups = ["k8scluster"]
-  key_name = "k8skey"
-  
+  key_name        = "k8skey"
+
   connection {
-      user        = "${var.ansible_user}"
-      private_key = "${file(var.private_key)}"
-      host = "${aws_instance.nexus.public_ip}"
+    user        = "${var.ansible_user}"
+    private_key = "${file(var.private_key)}"
+    host        = "${aws_instance.nexus.public_ip}"
   }
-  
+
   provisioner "remote-exec" {
     inline = ["sudo apt-add-repository ppa:ansible/ansible -y && sudo apt-get update && sleep 15 && sudo apt-get install -f ansible -y && sudo hostnamectl set-hostname nexus"]
-  } 
- 
+  }
+
   # This is where we configure the instance with ansible-playbook
   # Jenkins requires Java to be installed 
   provisioner "local-exec" {
@@ -38,7 +38,7 @@ resource "aws_instance" "nexus" {
 	  ansible-playbook -u ${var.ansible_user} --private-key ${var.private_key} -i hostfiles/nexus nexus-repo.yaml
     EOT
   }
-  
+
   root_block_device {
     volume_size = "10"
   }
